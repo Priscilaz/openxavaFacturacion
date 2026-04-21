@@ -31,11 +31,8 @@ pipeline {
         ///Etapa de obtención de código
         stage('Checkout') {
             steps {
-                echo "Iniciando descarga de codigo desde repositorio"
-                git url: 'https://github.com/Priscilaz/openxavaFacturacion.git',
-                    credentialsId: 'github-token'
-                echo "Codigo descargado correctamente"
-            }
+                echo "Codigo obtenido automaticamente desde la rama actual"
+                }
         }
 
         ///Etapa de compilación
