@@ -1,21 +1,4 @@
-//Estrategia 2: Modularidad 
-def runBuild() {
-    echo "Iniciando compilacion del proyecto"
-    bat 'mvn clean compile'
-    echo "Compilacion finalizada"
-}
-
-def runTests() {
-    echo "Ejecutando pruebas unitarias"
-    bat 'mvn test'
-    echo "Pruebas finalizadas"
-}
-
-def runQuality() {
-    echo "Ejecutando analisis de calidad de codigo"
-    bat 'mvn checkstyle:check || exit 0'
-    echo "Analisis de calidad finalizado"
-}
+@Library('my-shared-lib') _
 
 pipeline {
     agent any
