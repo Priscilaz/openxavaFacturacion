@@ -17,7 +17,7 @@ public class Activo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    //cambioPrueba
     @Required
     @Column(length = 50, unique = true)
     private String codigoInventario;
