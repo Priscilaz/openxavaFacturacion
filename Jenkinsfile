@@ -49,6 +49,18 @@ pipeline {
                         }
                     }
                 }
+
+                stage('SAST') {
+                    steps {
+                        echo "Iniciando análisis SAST con Semgrep"
+
+                        bat '''
+                        chcp 65001
+                        set PYTHONUTF8=1
+                        semgrep scan --config auto --sarif --output semgrep-report.sarif
+                        '''
+                    }
+                }
             }
         }
 
@@ -72,6 +84,9 @@ pipeline {
         }
     }
      post {
+         always {
+            archiveArtifacts artifacts: 'semgrep-report.sarif', fingerprint: true
+        }
         success {
             echo "Pipeline ejecutado correctamente"
         }
