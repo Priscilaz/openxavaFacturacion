@@ -84,6 +84,9 @@ pipeline {
         }
     }
      post {
+         always {
+            archiveArtifacts artifacts: 'semgrep-report.sarif', fingerprint: true
+        }
         success {
             echo "Pipeline ejecutado correctamente"
         }
