@@ -49,6 +49,18 @@ pipeline {
                         }
                     }
                 }
+
+                stage('SAST') {
+                    steps {
+                        echo "Iniciando análisis SAST con Semgrep"
+
+                        bat '''
+                        chcp 65001
+                        set PYTHONUTF8=1
+                        semgrep scan --config auto --sarif --output semgrep-report.sarif
+                        '''
+                    }
+                }
             }
         }
 
