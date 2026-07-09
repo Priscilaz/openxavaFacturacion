@@ -10,88 +10,132 @@ pipeline {
 
     stages {
 
-        //Estrategia 1: Etapas
-        ///Etapa de obtención de código
+        // Estrategia 1: Pipeline dividido por etapas
+
+        // Etapa de obtención de código
         stage('Checkout') {
             steps {
-                echo "Codigo obtenido automaticamente desde la rama actual"
-                }
+                echo "Código obtenido automáticamente desde la rama actual"
+            }
         }
 
-        ///Etapa de compilación
+        // Etapa de compilación
         stage('Build') {
             steps {
-                echo "Iniciando etapa de build"
+                echo "Iniciando etapa de compilación"
+
                 script {
                     runBuild()
                 }
             }
         }
 
-        //Estrategia 4: Paralelismo
-        stage('Tests y Calidad en paralelo') {
-            
+        // Estrategia 4: Ejecución de validaciones en paralelo
+        stage('Validaciones') {
+
             parallel {
+
                 stage('Tests') {
                     steps {
-                        echo "Inicio de pruebas en paralelo"
+                        echo "Ejecutando pruebas automatizadas"
+
                         script {
                             runTests()
                         }
                     }
                 }
 
-                stage('Code Quality') {
+                stage('Calidad') {
                     steps {
-                        echo "Inicio de analisis de calidad en paralelo"
+                        echo "Ejecutando análisis de calidad del código"
+
                         script {
                             runQuality()
                         }
                     }
                 }
 
-                stage('SAST') {
+                stage('Semgrep (SAST)') {
                     steps {
-                        echo "Iniciando análisis SAST con Semgrep"
+                        echo "[Seguridad] Ejecutando análisis SAST con Semgrep"
 
-                        bat '''
-                        chcp 65001
-                        set PYTHONUTF8=1
-                        semgrep scan --config auto --sarif --output semgrep-report.sarif
-                        '''
+                        script {
+                            runSemgrep()
+                        }
+                    }
+                }
+
+                stage('SonarQube (SAST)') {
+                    steps {
+                        echo "[Seguridad] Ejecutando análisis SAST con SonarQube"
+
+                        script {
+                            runSonar()
+                        }
                     }
                 }
             }
         }
 
-        ///Etapa de empaquetado
+        /*
+         * Se habilitará cuando configuremos el webhook entre
+         * SonarQube y Jenkins para validar el Quality Gate.
+         *
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        */
+
+        // Etapa de empaquetado
         stage('Package') {
             steps {
+
                 echo "Generando paquete del proyecto"
+
                 bat 'mvn package'
-                echo "Paquete generado"
+
+                echo "Paquete generado correctamente"
+
             }
         }
 
-        //Estrategia 3: IC por rama (solo main despliega)
+        // Estrategia 3: Integración Continua por rama
+        // Solo la rama principal realiza el despliegue
         stage('Deploy (solo main)') {
+
             when {
                 branch 'main'
             }
+
             steps {
-                echo "Deploy ejecutándose en MAIN"
+                echo "Deploy ejecutándose únicamente en la rama MAIN"
             }
         }
     }
-     post {
-         always {
+
+    post {
+
+        always {
+
+            // Evidencias generadas por las herramientas de seguridad
             archiveArtifacts artifacts: 'semgrep-report.sarif', fingerprint: true
+
         }
+
         success {
-            echo "Pipeline ejecutado correctamente"
+
+            echo "Pipeline ejecutado correctamente."
+
         }
+
         failure {
-            echo "El pipeline fallo. Revisar errores"
+
+            echo "El pipeline falló. Revisar los registros para identificar la causa."
+
         }
     }
 }
