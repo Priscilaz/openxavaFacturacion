@@ -217,11 +217,11 @@ pipeline {
 
         always {
 
-            script {
+            /*script {
 
                 stopManageLab()
 
-            }
+            }*/
 
             archiveArtifacts artifacts: '''
 semgrep-report.sarif,
