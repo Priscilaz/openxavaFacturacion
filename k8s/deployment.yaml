@@ -24,5 +24,9 @@ spec:
 
         imagePullPolicy: Always
 
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+
         ports:
         - containerPort: 8080
