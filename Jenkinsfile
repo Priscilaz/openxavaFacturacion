@@ -12,21 +12,21 @@ pipeline {
 
         // Estrategia 1: Pipeline dividido por etapas
 
-        // Etapa de obtención de código
         stage('Checkout') {
             steps {
                 echo "Código obtenido automáticamente desde la rama actual"
             }
         }
 
-        // Etapa de compilación
         stage('Build') {
             steps {
+
                 echo "Iniciando etapa de compilación"
 
                 script {
                     runBuild()
                 }
+
             }
         }
 
@@ -36,6 +36,7 @@ pipeline {
             parallel {
 
                 stage('Tests') {
+
                     steps {
 
                         echo "Ejecutando pruebas automatizadas"
@@ -45,9 +46,11 @@ pipeline {
                         }
 
                     }
+
                 }
 
                 stage('Semgrep (SAST)') {
+
                     steps {
 
                         echo "[Seguridad] Ejecutando análisis SAST con Semgrep"
@@ -57,12 +60,15 @@ pipeline {
                         }
 
                     }
+
                 }
+
             }
+
         }
 
-        // Validación de calidad
         stage('Checkstyle') {
+
             steps {
 
                 echo "Ejecutando análisis de calidad del código"
@@ -72,10 +78,11 @@ pipeline {
                 }
 
             }
+
         }
 
-        // Análisis SAST con SonarQube
         stage('SonarQube (SAST)') {
+
             steps {
 
                 echo "[Seguridad] Ejecutando análisis SAST con SonarQube"
@@ -85,10 +92,11 @@ pipeline {
                 }
 
             }
+
         }
 
-        // Política DevSecOps: detener el pipeline si el Quality Gate falla
         stage('Quality Gate') {
+
             steps {
 
                 echo "Validando Quality Gate de SonarQube"
@@ -100,10 +108,11 @@ pipeline {
                 echo "Quality Gate aprobado. Continuando con el pipeline."
 
             }
+
         }
 
-        // Etapa de empaquetado
         stage('Package') {
+
             steps {
 
                 echo "Generando paquete del proyecto"
@@ -113,23 +122,81 @@ pipeline {
                 echo "Paquete generado correctamente"
 
             }
+
         }
 
-        // Nueva etapa: construcción de la imagen Docker
-        stage('Build Docker Image') {
-        
+        stage('Start ManageLab') {
+
             steps {
-        
+
+                echo "Iniciando ManageLab para el análisis DAST"
+
+                script {
+                    startManageLab()
+                }
+
+            }
+
+        }
+
+        stage('DAST (OWASP ZAP)') {
+
+            steps {
+
+                echo "[Seguridad] Ejecutando análisis DAST con OWASP ZAP"
+
+                script {
+                    runDAST()
+                }
+
+            }
+
+        }
+
+        stage('Build Docker Image') {
+
+            steps {
+
                 echo "Construyendo imagen Docker del proyecto"
-        
+
                 script {
                     runDockerBuild()
                 }
-        
+
             }
+
         }
 
-        // Estrategia 3: Integración Continua por rama
+        stage('Docker Push') {
+
+            steps {
+        
+                echo "Publicando imagen Docker"
+        
+                script {
+                    runDockerPush()
+                }
+        
+            }
+        
+        }
+
+        stage('GitOps (Argo CD)') {
+
+            when {
+                branch 'main'
+            }
+        
+            steps {
+        
+                echo "Publicando cambios para que Argo CD sincronice el despliegue."
+        
+                echo "Argo CD detectará automáticamente los cambios en el repositorio y actualizará Kubernetes."
+        
+            }
+        
+        }
+
         stage('Deploy (solo main)') {
 
             when {
@@ -141,32 +208,42 @@ pipeline {
                 echo "Deploy ejecutándose únicamente en la rama MAIN"
 
             }
+
         }
+
     }
 
     post {
 
         always {
-    
-            // Evidencias generadas por las herramientas de seguridad
+
+            script {
+
+                stopManageLab()
+
+            }
+
             archiveArtifacts artifacts: '''
 semgrep-report.sarif,
 zap-report.html,
-zap-report.json
+zap-report.json,
+zap-report.md
 ''', allowEmptyArchive: true, fingerprint: true
-    
+
         }
-    
+
         success {
-    
+
             echo "Pipeline ejecutado correctamente."
-    
+
         }
-    
+
         failure {
-    
+
             echo "El pipeline falló. Revisar los registros para identificar la causa."
-    
+
         }
+
     }
+
 }
