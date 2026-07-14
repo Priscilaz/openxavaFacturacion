@@ -1,47 +1,57 @@
 package com.managelab.managelab.actions;
+
+import java.util.*;
+
 import org.openxava.actions.*;
 import org.openxava.jpa.*;
+
 import com.managelab.managelab.modelo.*;
 
-/**
- * Accion para rechazar una reserva - CU 7
- * Cambia el estado de la reserva a RECHAZADA y solicita un motivo.
- */
-public class RechazarReservaAction extends ViewBaseAction {
+public class RechazarReservaAction extends TabBaseAction {
 
     @Override
     public void execute() throws Exception {
-        Long id = (Long) getView().getValue("id");
-        String motivoRechazo = (String) getView().getValue("motivoRechazo");
 
-        if (id == null) {
-            addError("Debe seleccionar una reserva");
+        Map[] keys = getTab().getSelectedKeys();
+
+        if (keys == null || keys.length == 0) {
+            addError("Debe seleccionar una reserva (marque el checkbox de la izquierda).");
             return;
         }
 
-        if (motivoRechazo == null || motivoRechazo.trim().isEmpty()) {
-            addError("Debe ingresar un motivo de rechazo");
+        Long id = (Long) keys[0].get("id");
+
+        if (id == null) {
+            addError("No se pudo obtener el id de la reserva seleccionada.");
             return;
         }
 
         Reserva reserva = XPersistence.getManager().find(Reserva.class, id);
 
         if (reserva == null) {
-            addError("Reserva no encontrada");
+            addError("Reserva no encontrada.");
             return;
         }
 
         if (reserva.getEstadoReserva() != EstadoReserva.PENDIENTE) {
-            addError("Solo se pueden rechazar reservas pendientes");
+            addError("Solo se pueden rechazar reservas PENDIENTES.");
             return;
         }
 
+        String motivo = reserva.getMotivoRechazo();
+        if (motivo == null || motivo.trim().isEmpty()) {
+            addError("Para rechazar: abra la reserva, escriba el motivo de rechazo, guarde y luego rechace.");
+            return;
+        }
+
+        // Evitar que el callback vuelva a ejecutar la query de disponibilidad
+        reserva.setOmitirValidacionDisponibilidad(true);
+
         reserva.setEstadoReserva(EstadoReserva.RECHAZADA);
-        reserva.setMotivoRechazo(motivoRechazo);
         XPersistence.getManager().merge(reserva);
         XPersistence.commit();
 
-        addMessage("Reserva rechazada");
-        getView().refresh();
+        addMessage("Reserva rechazada.");
+        getTab().reset(); // refresca listado
     }
 }

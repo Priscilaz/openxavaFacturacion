@@ -3,22 +3,16 @@
 <!DOCTYPE controladores SYSTEM "dtds/controladores.dtd">
 
 <controladores>
-    
-    <!-- Variable de entorno: 
-    <var-entorno nombre="managelab_ANYO_DEFECTO" valor="2015"/>
-    -->
-    
-    <!-- Objeto de sesión:
-    <Objeto nombre="managelab_anyoActivo" clase="java.lang.Integer" valor="2015" 
-            ambito="global"/>
-    -->
-    
-    <!-- Controlador:
-    <controlador nombre="Profesor">
+
+    <controlador nombre="Reserva">
         <hereda-de controlador="Typical"/>
-        <accion nombre="new" icono="library-plus" atajo-de-teclado="Control N" 
-                clase="acciones.CrearProfesor"/>        
+
+        <accion nombre="aprobarReserva"
+                clase="com.managelab.managelab.actions.AprobarReservaAction"/>
+
+        <accion nombre="rechazarReserva"
+                clase="com.managelab.managelab.actions.RechazarReservaAction"/>
+
     </controlador>
-    -->
-    
+
 </controladores>

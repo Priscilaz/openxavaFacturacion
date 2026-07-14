@@ -12,6 +12,12 @@
 		<controlador nombre="Typical"/>		
 	</modulo-defecto>
 	
+	<modulo nombre="Reserva">
+    	<modelo nombre="Reserva"/>
+    	<controlador nombre="Reserva"/>
+	</modulo>
+	
+	
 	<!--
 	Podemos definir módulos adicionales, por ejemplo: 	
 	<modulo nombre="ProfesorSoloLectura">
