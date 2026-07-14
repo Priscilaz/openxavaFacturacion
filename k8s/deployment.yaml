@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: managelab
+  namespace: managelab
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: managelab
+
+  template:
+    metadata:
+      labels:
+        app: managelab
+
+    spec:
+      containers:
+      - name: managelab
+        image: priscilaz/managelab:v1
+
+        imagePullPolicy: Always
+
+        securityContext:
+          
+          allowPrivilegeEscalation: false
+
+        ports:
+        - containerPort: 8080
