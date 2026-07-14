@@ -57,6 +57,7 @@ nbdist/
 
 # VS Code
 .vscode/
+.vs/
 
 # =====================================
 # Sistema operativo
