@@ -115,6 +115,20 @@ pipeline {
             }
         }
 
+        // Nueva etapa: construcción de la imagen Docker
+        stage('Docker Build') {
+        
+            steps {
+        
+                echo "Construyendo imagen Docker del proyecto"
+        
+                script {
+                    runDockerBuild()
+                }
+        
+            }
+        }
+
         // Estrategia 3: Integración Continua por rama
         stage('Deploy (solo main)') {
 
