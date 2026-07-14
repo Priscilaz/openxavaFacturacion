@@ -147,22 +147,26 @@ pipeline {
     post {
 
         always {
-
+    
             // Evidencias generadas por las herramientas de seguridad
-            archiveArtifacts artifacts: 'semgrep-report.sarif', fingerprint: true
-
+            archiveArtifacts artifacts: '''
+semgrep-report.sarif,
+zap-report.html,
+zap-report.json
+''', allowEmptyArchive: true, fingerprint: true
+    
         }
-
+    
         success {
-
+    
             echo "Pipeline ejecutado correctamente."
-
+    
         }
-
+    
         failure {
-
+    
             echo "El pipeline falló. Revisar los registros para identificar la causa."
-
+    
         }
     }
 }
