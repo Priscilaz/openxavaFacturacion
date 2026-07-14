@@ -1,5 +1,0 @@
-configs:
-  - auto
-
-exclude-rules:
-  - yaml.kubernetes.security.run-as-non-root.run-as-non-root
