@@ -30,70 +30,77 @@ pipeline {
             }
         }
 
-        // Estrategia 4: Ejecución de validaciones en paralelo
+        // Estrategia 4: Paralelismo
         stage('Validaciones') {
 
             parallel {
 
                 stage('Tests') {
                     steps {
+
                         echo "Ejecutando pruebas automatizadas"
 
                         script {
                             runTests()
                         }
-                    }
-                }
 
-                stage('Calidad') {
-                    steps {
-                        echo "Ejecutando análisis de calidad del código"
-
-                        script {
-                            runQuality()
-                        }
                     }
                 }
 
                 stage('Semgrep (SAST)') {
                     steps {
+
                         echo "[Seguridad] Ejecutando análisis SAST con Semgrep"
 
                         script {
                             runSemgrep()
                         }
-                    }
-                }
 
-                stage('SonarQube (SAST)') {
-                    steps {
-                        echo "[Seguridad] Ejecutando análisis SAST con SonarQube"
-
-                        script {
-                            runSonar()
-                        }
                     }
                 }
             }
         }
 
-    
+        // Validación de calidad
+        stage('Checkstyle') {
+            steps {
+
+                echo "Ejecutando análisis de calidad del código"
+
+                script {
+                    runQuality()
+                }
+
+            }
+        }
+
+        // Análisis SAST con SonarQube
+        stage('SonarQube (SAST)') {
+            steps {
+
+                echo "[Seguridad] Ejecutando análisis SAST con SonarQube"
+
+                script {
+                    runSonar()
+                }
+
+            }
+        }
+
+        // Política DevSecOps: detener el pipeline si el Quality Gate falla
         stage('Quality Gate') {
             steps {
-        
-                echo "Validando Quality Gate de SonarQube..."
-        
+
+                echo "Validando Quality Gate de SonarQube"
+
                 timeout(time: 5, unit: 'MINUTES') {
-        
                     waitForQualityGate abortPipeline: true
-        
                 }
-        
+
                 echo "Quality Gate aprobado. Continuando con el pipeline."
-        
+
             }
         }
-        
 
         // Etapa de empaquetado
         stage('Package') {
@@ -109,7 +116,6 @@ pipeline {
         }
 
         // Estrategia 3: Integración Continua por rama
-        // Solo la rama principal realiza el despliegue
         stage('Deploy (solo main)') {
 
             when {
@@ -117,7 +123,9 @@ pipeline {
             }
 
             steps {
+
                 echo "Deploy ejecutándose únicamente en la rama MAIN"
+
             }
         }
     }
