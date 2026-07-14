@@ -116,7 +116,7 @@ pipeline {
         }
 
         // Nueva etapa: construcción de la imagen Docker
-        stage('Docker Build') {
+        stage('Build Docker Image') {
         
             steps {
         
