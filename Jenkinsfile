@@ -77,18 +77,23 @@ pipeline {
             }
         }
 
-        /*
-         * Se habilitará cuando configuremos el webhook entre
-         * SonarQube y Jenkins para validar el Quality Gate.
-         *
+    
         stage('Quality Gate') {
             steps {
+        
+                echo "Validando Quality Gate de SonarQube..."
+        
                 timeout(time: 5, unit: 'MINUTES') {
+        
                     waitForQualityGate abortPipeline: true
+        
                 }
+        
+                echo "Quality Gate aprobado. Continuando con el pipeline."
+        
             }
         }
-        */
+        
 
         // Etapa de empaquetado
         stage('Package') {
